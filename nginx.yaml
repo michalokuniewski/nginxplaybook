@@ -1,6 +1,6 @@
 ---
 - name: Install and start Nginx container
-  hosts: localhost
+  hosts: nginx_servers
   become: true
 
   tasks:
