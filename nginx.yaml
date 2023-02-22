@@ -1,0 +1,42 @@
+---
+- name: Install and start Nginx container
+  hosts: nginx_servers
+  become: true
+
+  tasks:
+    - name: Install Docker if not installed
+      become: true
+      command: which docker
+      register: docker_path
+      changed_when: false
+
+    - name: Install Docker
+      become: true
+      apt:
+       name: docker.io
+       update_cache: yes
+      when: docker_path.rc != 0
+
+    - name: Install Docker Python package
+      pip:
+        name: docker
+        state: present
+      tags: [docker]
+
+    - name: Pull Nginx image from Docker Hub
+      docker_image:
+        name: nginx:latest
+        tag: latest
+        state: present
+      tags: [nginx]
+
+    - name: Start Nginx container
+      docker_container:
+        name: nginx-container
+        image: nginx:latest
+        state: started
+        ports:
+          - "8085:80"
+        detach: yes
+      tags: [nginx]
+
